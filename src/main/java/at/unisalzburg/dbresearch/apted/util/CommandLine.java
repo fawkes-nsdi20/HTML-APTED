@@ -29,11 +29,13 @@ import java.util.Date;
 import java.util.List;
 import at.unisalzburg.dbresearch.apted.distance.APTED;
 import at.unisalzburg.dbresearch.apted.node.Node;
-import at.unisalzburg.dbresearch.apted.node.StringNodeData;
+// import at.unisalzburg.dbresearch.apted.node.StringNodeData;
+import at.unisalzburg.dbresearch.apted.node.ModifiedNodeData;
 import at.unisalzburg.dbresearch.apted.costmodel.CostModel;
-import at.unisalzburg.dbresearch.apted.costmodel.StringUnitCostModel;
+import at.unisalzburg.dbresearch.apted.costmodel.ModifiedCostModel;
 import at.unisalzburg.dbresearch.apted.parser.InputParser;
-import at.unisalzburg.dbresearch.apted.parser.BracketStringInputParser;
+// import at.unisalzburg.dbresearch.apted.parser.BracketStringInputParser;
+import at.unisalzburg.dbresearch.apted.parser.ModifiedInputParser;
 
 /**
  * This is the command line interface for executing APTED algorithm.
@@ -162,7 +164,7 @@ public class CommandLine<C extends CostModel, P extends InputParser> {
    * @param args array of command line arguments passed when executing jar file.
    */
   public static void main(String[] args) {
-    CommandLine<StringUnitCostModel, BracketStringInputParser> rtedCL = new CommandLine<>(new StringUnitCostModel(), new BracketStringInputParser());
+    CommandLine<ModifiedCostModel, ModifiedInputParser> rtedCL = new CommandLine<>(new ModifiedCostModel(), new ModifiedInputParser());
     rtedCL.runCommandLine(args);
   }
 
@@ -172,7 +174,7 @@ public class CommandLine<C extends CostModel, P extends InputParser> {
    * @param args array of command line arguments passed when executing jar file.
    */
    public void runCommandLine(String[] args) {
-    rted = new APTED<C, StringNodeData>(costModel);
+    rted = new APTED<C, ModifiedNodeData>(costModel);
     try {
       for (int i = 0; i < args.length; i++) {
         if (args[i].equals("--help") || args[i].equals("-h")) {
@@ -186,7 +188,7 @@ public class CommandLine<C extends CostModel, P extends InputParser> {
           parseTreesFromFiles(args[i+1], args[i+2]);
           i = i+2;
           run = true;
-        // TODO: -f option temporarily disabled for refactoring.
+        // TODO: -c option temporarily disabled for refactoring.
         // } else if (args[i].equals("-c") || args[i].equals("--costs")) {
         //   setCosts(args[i+1], args[i+2], args[i+3]);
         //   i = i+3;
@@ -263,14 +265,22 @@ public class CommandLine<C extends CostModel, P extends InputParser> {
    * @see Node
    */
   private void parseTreesFromFiles(String fs1, String fs2) {
+    String allLines = "", line = "";
     try {
-      t1 = inputParser.fromString((new BufferedReader(new FileReader(fs1))).readLine());
+      BufferedReader firstBuffer = new BufferedReader(new FileReader(fs1));
+      while ((line = firstBuffer.readLine()) != null)
+        allLines += (line+'\n');
+      t1 = inputParser.fromString(allLines);
     } catch (Exception e) {
       System.out.println("TREE1 argument has wrong format");
       System.exit(0);
     }
     try {
-      t2 = inputParser.fromString((new BufferedReader(new FileReader(fs2))).readLine());
+      allLines = "";
+      BufferedReader secondBuffer = new BufferedReader(new FileReader(fs2));
+      while ((line = secondBuffer.readLine()) != null)
+        allLines += (line+'\n');
+      t2 = inputParser.fromString(allLines);
     } catch (Exception e) {
       System.out.println("TREE2 argument has wrong format");
       System.exit(0);
