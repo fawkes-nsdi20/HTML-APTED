@@ -101,6 +101,16 @@ public class Node<D> {
     return res;
   }
 
+  public String toMyString() {
+    StringBuilder sbuilder = new StringBuilder("{");
+    sbuilder.append(((ModifiedNodeData)getNodeData()).getName());
+    for(Node<D> child : getChildren()) {
+      sbuilder.append(child.toString());
+    }
+    sbuilder.append("}");
+    return sbuilder.toString();
+  }
+
   /**
    * Returns node data. Used especially for calculating rename cost.
    *

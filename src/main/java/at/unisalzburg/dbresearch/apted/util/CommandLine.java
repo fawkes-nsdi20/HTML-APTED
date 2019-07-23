@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Date;
 import java.util.List;
+import java.util.ArrayList;
 import at.unisalzburg.dbresearch.apted.distance.APTED;
 import at.unisalzburg.dbresearch.apted.node.Node;
 // import at.unisalzburg.dbresearch.apted.node.StringNodeData;
@@ -213,6 +214,11 @@ public class CommandLine<C extends CostModel, P extends InputParser> {
 
     long time1 = (new Date()).getTime();
 
+    System.out.println("t1:#"+t1.getNodeCount()+" t2=#"+t2.getNodeCount());
+    printLevelByLevel(t1);
+    System.out.println("--------------------------------------------------");
+    printLevelByLevel(t2);
+    System.out.println("--------------------------------------------------");
     ted = rted.computeEditDistance(t1, t2);
 
     long time2 = (new Date()).getTime();
@@ -228,6 +234,27 @@ public class CommandLine<C extends CostModel, P extends InputParser> {
       for (int[] nodeAlignment : editMapping) {
         System.out.println(nodeAlignment[0] + "->" + nodeAlignment[1]);
       }
+    }
+
+  }
+
+  // for debugging purposes: print tree in a BFS manner, level by level
+  private void printLevelByLevel(Node<ModifiedNodeData> tree) {
+    int level = 0;
+    ArrayList<Node<ModifiedNodeData>> nextLevel = new ArrayList<Node<ModifiedNodeData>>();
+    nextLevel.add(tree);
+    ArrayList<Node<ModifiedNodeData>> queue = null;
+    while(nextLevel.size() > 0) {
+      System.out.print("level "+level+": ");
+      queue = nextLevel;
+      nextLevel = new ArrayList<Node<ModifiedNodeData>>();
+      while (queue.size() > 0) {
+        Node<ModifiedNodeData> current = queue.remove(0);
+        nextLevel.addAll(current.getChildren());
+        System.out.print(current.getNodeData().getName()+" ");
+      }
+      System.out.println();
+      ++level;
     }
 
   }

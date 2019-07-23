@@ -25,11 +25,8 @@ package at.unisalzburg.dbresearch.apted.parser;
 
 import java.util.List;
 import java.util.ArrayList;
-import at.unisalzburg.dbresearch.apted.util.FormatUtilities;
 import at.unisalzburg.dbresearch.apted.node.Node;
 import at.unisalzburg.dbresearch.apted.node.ModifiedNodeData;
-
-// [TODO] Make this parser independent from FormatUtilities - move here relevant elements.
 
 /**
  * Parser for the input trees in the bracket notation with a single string-value
@@ -45,17 +42,88 @@ import at.unisalzburg.dbresearch.apted.node.ModifiedNodeData;
 public class ModifiedInputParser implements InputParser<ModifiedNodeData>
 {
 
-    public static ModifiedNodeData getRoot(String s)
+    private static int matchingBracket(String s, int pos)
+    {
+        if(s == null || pos > s.length() - 1)
+            return -1;
+        char open = s.charAt(pos);
+        char close;
+        switch(open) {
+            case 123: // '{'
+                close = '}';
+                break;
+
+            case 40: // '('
+                close = ')';
+                break;
+
+            case 91: // '['
+                close = ']';
+                break;
+
+            case 60: // '<'
+                close = '>';
+                break;
+
+            default:
+                return -1;
+        }
+        pos++;
+
+        boolean inDoubleQuotes = false; //inside string content of a TextNode
+        int count;
+        for(count = 1; count != 0 && pos < s.length(); pos++) {
+            if(s.charAt(pos) == '"' && s.charAt(pos-1) != '\\')
+                inDoubleQuotes = !inDoubleQuotes;
+            else if(!inDoubleQuotes && s.charAt(pos) == open)
+                count++;
+            else if(!inDoubleQuotes && s.charAt(pos) == close)
+                count--;
+        }
+
+        if(count != 0)
+            return -1;
+        else
+            return pos - 1;
+    }
+
+    private static List<String> getChildren(String s)
+    {
+        if(s != null && s.length() > 2 && s.startsWith("{") && s.endsWith("}"))
+        {
+            List<String> children = new ArrayList<>();
+            int end = s.indexOf('{', 1);
+            if(end == -1)
+                return children;
+            String rest = s.substring(end, s.length() - 1);
+            for(int match = 0; rest.length() > 0 && (match = matchingBracket(rest, 0)) != -1;)
+            {
+                children.add(rest.substring(0, match + 1));
+                if(match + 1 < rest.length())
+                    rest = rest.substring(match + 1);
+                else
+                    rest = "";
+            }
+
+            return children;
+        } else
+        {
+            return null;
+        }
+    }
+
+    private static ModifiedNodeData getRoot(String s)
     {
         if (s != null && s.length() > 2 && s.startsWith("{") && s.endsWith("}"))
         {
             s = s.substring(1, s.length()-1); // remove the opening and closing brackets
             ModifiedNodeData parsed;
             // check if this is a TextNode, the string content might contains other delimiters
-            if (s.startsWith("text"))
+            if (s.startsWith("#text"))
             {
-                parsed = new ModifiedNodeData("text");
-                parsed.setContent(s.substring(5)); // including ':', maybe remove double quotes too?
+                int end = s.indexOf(':', 1);
+                parsed = new ModifiedNodeData(s.substring(0, end));
+                parsed.setContent(s.substring(end+1)); // including ':'
             }
             else // it is an Element node, should only contain node name & children.
             {
@@ -86,15 +154,14 @@ public class ModifiedInputParser implements InputParser<ModifiedNodeData>
         Node<ModifiedNodeData> node = new Node<ModifiedNodeData>(getRoot(s));
         // look for children only if the node is an element,
         // otherwise the text content might have a '{' or '}' and parser considers them as separate nodes wrongly.
-        if (!node.getNodeData().getName().equals("text"))
+        if (!node.getNodeData().getName().startsWith("#text"))
         {
-            List<String> c = FormatUtilities.getChildren(s);
+            // System.out.println(node.getNodeData().getName());
+            List<String> c = getChildren(s);
             for(int i = 0; i < c.size(); i++){
                 node.addChild(fromString(c.get(i)));
             }
         }
-        // else
-        // System.out.println(" -> content:"+node.getNodeData().getContent());
 
         return node;
     }
