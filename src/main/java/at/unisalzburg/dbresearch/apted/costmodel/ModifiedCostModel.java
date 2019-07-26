@@ -70,7 +70,7 @@ public class ModifiedCostModel implements CostModel<ModifiedNodeData>
     {
         if (n1.getNodeData().getName().equals(n2.getNodeData().getName()))
         {
-            if (n1.getNodeData().getName().equals("text"))
+            if (n1.getNodeData().getName().equals("#text"))
             {
                 return (n1.getNodeData().getContent().equals(n2.getNodeData().getContent())) ? 0.0f : 1.0f;
             }

@@ -214,11 +214,12 @@ public class CommandLine<C extends CostModel, P extends InputParser> {
 
     long time1 = (new Date()).getTime();
 
-    System.out.println("t1:#"+t1.getNodeCount()+" t2=#"+t2.getNodeCount());
-    printLevelByLevel(t1);
-    System.out.println("--------------------------------------------------");
-    printLevelByLevel(t2);
-    System.out.println("--------------------------------------------------");
+    // System.out.println("t1:#"+t1.getNodeCount()+" t2=#"+t2.getNodeCount());
+    // printLevelByLevel(t1);
+    // System.out.println("--------------------------------------------------");
+    // printLevelByLevel(t2);
+    // System.out.println("--------------------------------------------------");
+
     ted = rted.computeEditDistance(t1, t2);
 
     long time2 = (new Date()).getTime();
